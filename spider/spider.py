@@ -16,10 +16,43 @@ def download_images(args, images):
 		with open(filename, 'wb') as f:
 			f.write(r.content)
 
-def request(args):
+	print(len(images))
 
-	r = requests.get(args.url)
+def search_from_tag(tag, arg, c):
+
+	idx = 0
+	tag = "<" + tag
+	arg = arg + '="'
+	results = []
+	while 1:
+		idx = c.find(tag, idx)
+		if idx == -1:
+			break
+		r_start = c.find(arg, idx)
+		if r_start == -1:
+			print("ERROR")
+			return
+		r_start = r_start + len(arg)
+		r_end = c.find('"', r_start)
+		if r_end == -1:
+			print("ERROR")
+			return
+		result = c[r_start:r_end]
+		results.append(result)
+		idx = r_end
+
+	return results
+
+def get_images_from_url(url):
+
+	r = requests.get(url)
+	if r.status_code != 200:
+		print(r)
+		return
+
 	c = str(r.content)
+
+	return search_from_tag("img", "src", c)
 
 	images = []
 	for ext in exts:
@@ -49,7 +82,7 @@ def main():
 	args = parse_args()
 	print(args)
 
-	images = request(args)
+	images = get_images_from_url(args.url)
 	print(images)
 	download_images(args, images)
 
