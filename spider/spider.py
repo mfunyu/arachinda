@@ -17,9 +17,10 @@ def form_url(url, base):
 def download_images(url, directory, images):
 
 	for i in images:
-
-		if not i.startswith("http"):
-			i = url + i.strip()
+		pattern = re.compile(fr'.*({"|".join(re.escape(ext) for ext in exts)})$')
+		if not pattern.match(url):
+			continue
+		i = form_url(i, url)
 		r = requests.get(i)
 		filename = i[len(url) + 1:].replace('/', '-')
 		filename = directory + filename
@@ -66,19 +67,23 @@ def validate_urls(url, urls):
 	return valids
 
 def spider(args, l, url):
-	r = requests.get(url)
+	print("GET", url, l)
+	try:
+		r = requests.get(url)
+	except requests.exceptions.ConnectionError:
+		print("ERROR: connection refused - ", url)
+		return
 	if r.status_code != 200:
 		print("ERROR", url, r)
 		return
 	c = str(r.content)
 
-	print(url, l)
-	images = search_from_tag("img", "src", c)
+	images = re.findall(r'<img[^>]+src="(.*?)"', c)
 	#download_images(url, args.p, images)
 	print(len(images))
 
 	if l:
-		urls = search_from_tag("a", "href", c)
+		urls = re.findall(r'<a[^>]+href="(.*?)"', c)
 		urls = validate_urls(url, urls)
 		for url in urls:
 			spider(args, l - 1, url)
