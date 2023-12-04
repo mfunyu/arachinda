@@ -2,6 +2,8 @@
 import argparse
 import requests
 import re
+import os 
+  
 
 exts = [".jpg", ".jpeg", ".png", ",gif", ".bmp"]
 
@@ -9,84 +11,54 @@ def form_url(url, base):
 	if url.startswith("http"):
 		return url
 	if base.startswith('//'):
-		return url + base[1:]
-	if base.startswith('/'):
-		return url + base
-	return url + base
+		return base + url[:1]
+	return base + url
+
 
 def download_images(url, directory, images):
+	init = False
 
-	for i in images:
-		pattern = re.compile(fr'.*({"|".join(re.escape(ext) for ext in exts)})$')
-		if not pattern.match(url):
+	pattern = re.compile(fr'.*({"|".join(re.escape(ext) for ext in exts)})$')
+	for i_url in images:
+		if not pattern.match(i_url):
 			continue
-		i = form_url(i, url)
-		r = requests.get(i)
-		filename = i[len(url) + 1:].replace('/', '-')
-		filename = directory + filename
+		print(i_url)
+		i_url = form_url(i_url, url)
+		content = request(i_url)
+		if not content:
+			continue
+		filename = directory + i_url[len(url) + 1:].replace('/', '-')
+		if not init and not os.path.exists(directory): 
+			os.makedirs(directory)
+			init = True
 		with open(filename, 'wb') as f:
-			f.write(r.content)
+			f.write(content)
 
-
-def search_from_tag(tag, arg, c):
-
-	idx = 0
-	tag = "<" + tag
-	arg = arg + '="'
-	results = []
-	while 1:
-		idx = c.find(tag, idx)
-		if idx == -1:
-			break
-		r_start = c.find(arg, idx)
-		if r_start == -1:
-			print("ERROR")
-			break
-		r_start = r_start + len(arg)
-		r_end = c.find('"', r_start)
-		if r_end == -1:
-			print("ERROR")
-			break
-		result = c[r_start:r_end]
-		results.append(result)
-		idx = r_end
-
-	return results
-
-def validate_urls(url, urls):
-	valids = []
-	url = re.findall(r'^(https?://[^/]+)', url)[0]
-	print("base", url)
-	for u in urls:
-		if not u.startswith("http"):
-			if u == "/":
-				continue
-			u = url + u
-		valids.append(u)
-
-	return valids
-
-def spider(args, l, url):
-	print("GET", url, l)
+def request(url):
 	try:
+		print("GET", url)
 		r = requests.get(url)
 	except requests.exceptions.ConnectionError:
 		print("ERROR: connection refused - ", url)
 		return
 	if r.status_code != 200:
-		print("ERROR", url, r)
+		print("ERROR:", url, r)
 		return
-	c = str(r.content)
+	return r.content
 
+def spider(url, loop, dir):
+	c = str(request(url))
 	images = re.findall(r'<img[^>]+src="(.*?)"', c)
-	#download_images(url, args.p, images)
-	print(len(images))
+	base = re.search(r'^(https?://[^/]+)', url).group()
+	download_images(base, dir, images)
 
-	if l:
+	if loop:
 		urls = re.findall(r'<a[^>]+href="(.*?)"', c)
-		urls = validate_urls(url, urls)
 		for url in urls:
-			spider(args, l - 1, url)
+			if url.startswith('#') or url.startswith("ftp:"):
+				continue
+			url = form_url(url, base)
+			spider(url, loop - 1, dir)
 
 def parse_args():
 	parser = argparse.ArgumentParser()
@@ -97,16 +69,16 @@ def parse_args():
 	args = parser.parse_args()
 	if not args.r:
 		args.l = 0
+	if not args.url.startswith('http'):
+		print("ERROR:", url)
+		exit(1)
 	if args.url.endswith('/'):
 		args.url = args.url[:-1]
 
 	return args
 
 def main():
-
 	args = parse_args()
-	print(args)
-
-	spider(args, args.l, args.url)
+	spider(args.url, args.l, args.p)
 
 main()
