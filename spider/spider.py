@@ -4,10 +4,19 @@ import requests
 
 exts = [".jpg", ".jpeg", ".png", ",gif", ".bmp"]
 
+def form_url(url, base):
+	if url.startswith("http"):
+		return url
+	if base.startswith('//'):
+		return url + base[1:]
+	if base.startswith('/'):
+		return url + base
+	return url + base
+
 def download_images(url, directory, images):
 
 	for i in images:
-		
+
 		if not i.startswith("http"):
 			i = url + i.strip()
 		r = requests.get(i)
@@ -84,6 +93,8 @@ def parse_args():
 	args = parser.parse_args()
 	if not args.r:
 		args.l = 0
+	if args.url.endswith('/'):
+		args.url = args.url[:-1]
 
 	return args
 
