@@ -4,14 +4,15 @@ import requests
 
 exts = [".jpg", ".jpeg", ".png", ",gif", ".bmp"]
 
-def download_images(args, images):
+def download_images(url, directory, images):
 
 	for i in images:
+		
 		if not i.startswith("http"):
-			i = args.url + i.strip()
+			i = url + i.strip()
 		r = requests.get(i)
-		filename = i[len(args.url) + 1:].replace('/', '-')
-		filename = args.p + filename
+		filename = i[len(url) + 1:].replace('/', '-')
+		filename = directory + filename
 		with open(filename, 'wb') as f:
 			f.write(r.content)
 
@@ -42,15 +43,18 @@ def search_from_tag(tag, arg, c):
 
 	return results
 
-def validate_urls(args, urls):
+def validate_urls(url, urls):
 	valids = []
-	for url in urls:
-		if not url.startswith("http"):
-			path = url[1:]
-			if not path:
+	second_slash = url.find('/', url.find("://") + 3)
+	if second_slash != -1:
+		url = url[:second_slash]
+	print("base", url)
+	for u in urls:
+		if not u.startswith("http"):
+			if u == "/":
 				continue
-			url = args.url + url
-		valids.append(url)
+			u = url + u
+		valids.append(u)
 
 	return valids
 
@@ -63,11 +67,11 @@ def spider(args, l, url):
 
 	print(url, l)
 	images = search_from_tag("img", "src", c)
-	download_images(args, images)
+	download_images(url, args.p, images)
 
 	if l:
 		urls = search_from_tag("a", "href", c)
-		urls = validate_urls(args, urls)
+		urls = validate_urls(url, urls)
 		for url in urls:
 			spider(args, l - 1, url)
 
