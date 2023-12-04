@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import requests
+import re
 
 exts = [".jpg", ".jpeg", ".png", ",gif", ".bmp"]
 
@@ -25,7 +26,6 @@ def download_images(url, directory, images):
 		with open(filename, 'wb') as f:
 			f.write(r.content)
 
-	print(len(images))
 
 def search_from_tag(tag, arg, c):
 
@@ -54,9 +54,7 @@ def search_from_tag(tag, arg, c):
 
 def validate_urls(url, urls):
 	valids = []
-	second_slash = url.find('/', url.find("://") + 3)
-	if second_slash != -1:
-		url = url[:second_slash]
+	url = re.findall(r'^(https?://[^/]+)', url)[0]
 	print("base", url)
 	for u in urls:
 		if not u.startswith("http"):
@@ -76,7 +74,8 @@ def spider(args, l, url):
 
 	print(url, l)
 	images = search_from_tag("img", "src", c)
-	download_images(url, args.p, images)
+	#download_images(url, args.p, images)
+	print(len(images))
 
 	if l:
 		urls = search_from_tag("a", "href", c)
