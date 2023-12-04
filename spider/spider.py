@@ -1,9 +1,33 @@
 #!/usr/bin/env python3
 import argparse
+import requests
 
+def request_images(args, images):
 
-def validate_url(url):
-	# ?
+	for i in images:
+		r = requests.get(args.url + i)
+		filename = i
+		filename = filename.replace('/', '-')
+		filename = args.p + filename
+		with open(filename, 'wb') as f:
+			f.write(r.content)
+
+def request(args):
+
+	r = requests.get(args.url)
+	c = str(r.content)
+
+	i = 0
+	images = []
+	while 1:
+		ext = ".png"
+		i = c.find(ext, i + 1)
+		if i == -1:
+			break
+		start = c.rfind('"', 0, i) + 1
+		images.append(c[start:i + len(ext)])
+
+	return images
 
 def parse_args():
 	parser = argparse.ArgumentParser()
@@ -20,6 +44,8 @@ def main():
 	args = parse_args()
 	print(args)
 
-	validate_url(args.url)
+	images = request(args)
+
+	request_images(args, images)
 
 main()
