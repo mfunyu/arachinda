@@ -8,7 +8,6 @@ exts = [".jpg", ".jpeg", ".png", ",gif", ".bmp"]
 links_visited = set()
 
 def form_url(url, base):
-	print(url, base)
 	if url.startswith("http"):
 		return url
 	if base.startswith('//'):
@@ -68,15 +67,15 @@ def spider(url, loop, dir):
 	download_images(base, dir, images)
 
 	if loop:
-		urls = re.findall(r'<a[^>]+href="(.*?)"', c)
-		for url in urls:
-			if not is_valid_link(url):
+		hrefs = re.findall(r'<a[^>]+href="(.*?)"', c)
+		for href in hrefs:
+			if not is_valid_link(href):
 				continue
-			if url in links_visited:
+			if href in links_visited:
 				continue
-			links_visited.add(url)
-			url = form_url(url, base)
-			spider(url, loop - 1, dir)
+			links_visited.add(href)
+			href = form_url(href, base)
+			spider(href, loop - 1, dir)
 
 def parse_args():
 	parser = argparse.ArgumentParser()
