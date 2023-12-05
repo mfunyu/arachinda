@@ -4,18 +4,18 @@ import requests
 import re
 import os
 
-
 exts = [".jpg", ".jpeg", ".png", ",gif", ".bmp"]
-
-links_visited = {}
+links_visited = set()
 
 def form_url(url, base):
+	print(url, base)
 	if url.startswith("http"):
 		return url
 	if base.startswith('//'):
 		return base + url[:1]
+	if not url.startswith('/'):
+		return base + '/' + url
 	return base + url
-
 
 def download_images(url, directory, images):
 	init = False
@@ -38,7 +38,7 @@ def download_images(url, directory, images):
 
 def request(url):
 	try:
-		print("GET", url)
+		#print("GET", url)
 		r = requests.get(url)
 	except requests.exceptions.ConnectionError:
 		print("ERROR: connection refused - ", url)
@@ -72,6 +72,9 @@ def spider(url, loop, dir):
 		for url in urls:
 			if not is_valid_link(url):
 				continue
+			if url in links_visited:
+				continue
+			links_visited.add(url)
 			url = form_url(url, base)
 			spider(url, loop - 1, dir)
 
@@ -95,5 +98,6 @@ def parse_args():
 def main():
 	args = parse_args()
 	spider(args.url, args.l, args.p)
+	print(links_visited)
 
 main()
