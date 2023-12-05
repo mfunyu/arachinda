@@ -90,7 +90,7 @@ def parse_args():
 	if not args.r:
 		args.l = 0
 	if not args.url.startswith('http'):
-		print("ERROR:", url)
+		print("ERROR:", args.url)
 		exit(1)
 	if args.url.endswith('/'):
 		args.url = args.url[:-1]
