@@ -66,16 +66,18 @@ def spider(url, loop, dir):
 	base = re.search(r'^(https?://[^/]+)', url).group()
 	download_images(base, dir, images)
 
-	if loop:
-		hrefs = re.findall(r'<a[^>]+href="(.*?)"', c)
-		for href in hrefs:
-			if not is_valid_link(href):
-				continue
-			if href in links_visited:
-				continue
-			links_visited.add(href)
-			href = form_url(href, base)
-			spider(href, loop - 1, dir)
+	if not loop:
+		return
+
+	hrefs = re.findall(r'<a[^>]+href="(.*?)"', c)
+	for href in hrefs:
+		if not is_valid_link(href):
+			continue
+		if href in links_visited:
+			continue
+		links_visited.add(href)
+		href = form_url(href, base)
+		spider(href, loop - 1, dir)
 
 def parse_args():
 	parser = argparse.ArgumentParser()
