@@ -2,10 +2,12 @@
 import argparse
 import requests
 import re
-import os 
-  
+import os
+
 
 exts = [".jpg", ".jpeg", ".png", ",gif", ".bmp"]
+
+links_visited = {}
 
 def form_url(url, base):
 	if url.startswith("http"):
@@ -28,7 +30,7 @@ def download_images(url, directory, images):
 		if not content:
 			continue
 		filename = directory + i_url[len(url) + 1:].replace('/', '-')
-		if not init and not os.path.exists(directory): 
+		if not init and not os.path.exists(directory):
 			os.makedirs(directory)
 			init = True
 		with open(filename, 'wb') as f:
@@ -46,6 +48,19 @@ def request(url):
 		return
 	return r.content
 
+def is_valid_link(href):
+	if href.startswith('#'):
+		return False
+	if href.startswith("ftp:"):
+		return False
+	if href.startswith("tel:"):
+		return False
+	if href.startswith("javascript:"):
+		return False
+	if href.startswith("mailto:"):
+		return False
+	return True
+
 def spider(url, loop, dir):
 	c = str(request(url))
 	images = re.findall(r'<img[^>]+src="(.*?)"', c)
@@ -55,7 +70,7 @@ def spider(url, loop, dir):
 	if loop:
 		urls = re.findall(r'<a[^>]+href="(.*?)"', c)
 		for url in urls:
-			if url.startswith('#') or url.startswith("ftp:"):
+			if not is_valid_link(url):
 				continue
 			url = form_url(url, base)
 			spider(url, loop - 1, dir)
