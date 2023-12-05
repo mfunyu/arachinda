@@ -80,13 +80,7 @@ def spider(url, loop, dir):
 		href = form_url(href, base)
 		spider(href, loop - 1, dir)
 
-def parse_args():
-	parser = argparse.ArgumentParser()
-	parser.add_argument("url", metavar="URL", type=str)
-	parser.add_argument("-r", action="store_true")
-	parser.add_argument("-l", default=5, type=int)
-	parser.add_argument("-p", default="./data/", type=str)
-	args = parser.parse_args()
+def validate_args(args):
 	if not args.r:
 		args.l = 0
 	if not args.url.startswith('http'):
@@ -97,10 +91,17 @@ def parse_args():
 	if not args.p.endswith('/'):
 		args.p = args.p + '/'
 
-	return args
+def parse_args():
+	parser = argparse.ArgumentParser()
+	parser.add_argument("url", metavar="URL", type=str)
+	parser.add_argument("-r", action="store_true")
+	parser.add_argument("-l", default=5, type=int)
+	parser.add_argument("-p", default="./data/", type=str)
+	return parser.parse_args()
 
 def main():
 	args = parse_args()
+	validate_args(args)
 	spider(args.url, args.l, args.p)
 	print(links_visited)
 
