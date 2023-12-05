@@ -23,7 +23,6 @@ def download_images(url, directory, images):
 	for img_link in images:
 		if not pattern.match(img_link):
 			continue
-		print(img_link)
 		img_link = form_url(img_link, url)
 		content = request(img_link)
 		if not content:
@@ -37,7 +36,6 @@ def download_images(url, directory, images):
 
 def request(url):
 	try:
-		#print("GET", url)
 		r = requests.get(url)
 	except requests.exceptions.ConnectionError:
 		print("ERROR: connection refused - ", url)
@@ -45,6 +43,7 @@ def request(url):
 	except:
 		print("ERROR: invalid URL -", url)
 		exit(1)
+
 	if r.status_code != 200:
 		print("ERROR:", url, r)
 		return
@@ -79,21 +78,22 @@ def spider(url, loop, dir):
 		if href in links_visited:
 			continue
 		links_visited.add(href)
-		print(url, "|", href, "|", base)
 		href = form_url(href, base)
 		spider(href, loop - 1, dir)
 
 def validate_args(args):
 	if not args.r:
 		args.l = 0
+
 	if '.' not in args.url :
-		print("Error: not a valid URL -", args.url)
+		print("ERROR: not a valid URL -", args.url)
 		exit(1)
 	if not args.url.startswith('https://') and\
 		not args.url.startswith('http://'):
 		args.url = 'https://' + args.url
 	if args.url.endswith('/'):
 		args.url = args.url[:-1]
+
 	if not args.p.endswith('/'):
 		args.p = args.p + '/'
 
@@ -109,6 +109,5 @@ def main():
 	args = parse_args()
 	validate_args(args)
 	spider(args.url, args.l, args.p)
-	print(links_visited)
 
 main()
