@@ -73,7 +73,10 @@ def log(url, loop, num_imgs):
 	print('->', num_imgs)
 
 def spider(url, loop, dir, space):
-	c = str(request(url))
+	c = request(url)
+	if not c:
+		return
+	c = str(c)
 	images = re.findall(r'<img[^>]+src="(.*?)"', c)
 	base = re.search(r'^(https?://[^/]+)', url).group()
 	num_imgs = download_images(base, dir, images)
