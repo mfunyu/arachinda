@@ -1,4 +1,6 @@
 *
 !*.py
 !.gitignore
-!test/*
+!test/
+!test/**
+
