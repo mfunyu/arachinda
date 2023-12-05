@@ -26,7 +26,7 @@ def download_images(url, directory, images):
 		if not pattern.match(img_link):
 			continue
 		img_link = form_url(img_link, url)
-		#print(url, "|", img_link, "|")
+		img_link = fix_unicode(img_link)
 		content = request(img_link)
 		if not content:
 			continue
@@ -38,6 +38,9 @@ def download_images(url, directory, images):
 			f.write(content)
 		cnt = cnt + 1
 	return cnt
+
+def fix_unicode(url):
+	return url.replace('\\x', '%')
 
 def request(url):
 	try:
@@ -73,6 +76,7 @@ def log(url, loop, num_imgs):
 	print('->', num_imgs)
 
 def spider(url, loop, dir, space):
+	url = fix_unicode(url)
 	c = request(url)
 	if not c:
 		return
