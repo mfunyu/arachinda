@@ -94,6 +94,8 @@ def parse_args():
 		exit(1)
 	if args.url.endswith('/'):
 		args.url = args.url[:-1]
+	if not args.p.endswith('/'):
+		args.p = args.p + '/'
 
 	return args
 
