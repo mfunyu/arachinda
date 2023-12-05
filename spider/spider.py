@@ -6,6 +6,7 @@ import os
 
 exts = [".jpg", ".jpeg", ".png", ",gif", ".bmp"]
 links_visited = set()
+total = 0
 
 def form_url(url, base):
 	if url.startswith("http"):
@@ -20,6 +21,7 @@ def download_images(url, directory, images):
 	init = False
 
 	pattern = re.compile(fr'.*({"|".join(re.escape(ext) for ext in exts)})$')
+	cnt = 0
 	for img_link in images:
 		if not pattern.match(img_link):
 			continue
@@ -33,6 +35,8 @@ def download_images(url, directory, images):
 			init = True
 		with open(filename, 'wb') as f:
 			f.write(content)
+		cnt = cnt + 1
+	return cnt
 
 def request(url):
 	try:
@@ -62,12 +66,16 @@ def is_valid_link(href):
 		return False
 	return True
 
+def log(url, loop, num_imgs):
+	print(' ' * (total - loop), '-', url, end =" ")
+	print('->', num_imgs)
+
 def spider(url, loop, dir, space):
-	print(space, url)
 	c = str(request(url))
 	images = re.findall(r'<img[^>]+src="(.*?)"', c)
 	base = re.search(r'^(https?://[^/]+)', url).group()
-	download_images(base, dir, images)
+	num_imgs = download_images(base, dir, images)
+	log(url, loop, num_imgs)
 
 	if not loop:
 		return
@@ -85,6 +93,8 @@ def spider(url, loop, dir, space):
 def validate_args(args):
 	if not args.r:
 		args.l = 0
+	global total
+	total = args.l
 
 	if '.' not in args.url :
 		print("ERROR: not a valid URL -", args.url)
