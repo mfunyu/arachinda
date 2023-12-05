@@ -20,15 +20,15 @@ def download_images(url, directory, images):
 	init = False
 
 	pattern = re.compile(fr'.*({"|".join(re.escape(ext) for ext in exts)})$')
-	for i_url in images:
-		if not pattern.match(i_url):
+	for img_link in images:
+		if not pattern.match(img_link):
 			continue
-		print(i_url)
-		i_url = form_url(i_url, url)
-		content = request(i_url)
+		print(img_link)
+		img_link = form_url(img_link, url)
+		content = request(img_link)
 		if not content:
 			continue
-		filename = directory + i_url[len(url) + 1:].replace('/', '-')
+		filename = directory + img_link[len(url) + 1:].replace('/', '-')
 		if not init and not os.path.exists(directory):
 			os.makedirs(directory)
 			init = True
@@ -76,6 +76,7 @@ def spider(url, loop, dir):
 		if href in links_visited:
 			continue
 		links_visited.add(href)
+		print(url, "|", href, "|", base)
 		href = form_url(href, base)
 		spider(href, loop - 1, dir)
 
