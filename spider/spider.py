@@ -62,7 +62,8 @@ def is_valid_link(href):
 		return False
 	return True
 
-def spider(url, loop, dir):
+def spider(url, loop, dir, space):
+	print(space, url)
 	c = str(request(url))
 	images = re.findall(r'<img[^>]+src="(.*?)"', c)
 	base = re.search(r'^(https?://[^/]+)', url).group()
@@ -79,7 +80,7 @@ def spider(url, loop, dir):
 			continue
 		links_visited.add(href)
 		href = form_url(href, base)
-		spider(href, loop - 1, dir)
+		spider(href, loop - 1, dir, ' ' + space)
 
 def validate_args(args):
 	if not args.r:
@@ -108,6 +109,6 @@ def parse_args():
 def main():
 	args = parse_args()
 	validate_args(args)
-	spider(args.url, args.l, args.p)
+	spider(args.url, args.l, args.p, "-")
 
 main()
