@@ -42,6 +42,9 @@ def request(url):
 	except requests.exceptions.ConnectionError:
 		print("ERROR: connection refused - ", url)
 		return
+	except:
+		print("ERROR: invalid URL -", url)
+		exit(1)
 	if r.status_code != 200:
 		print("ERROR:", url, r)
 		return
@@ -83,9 +86,12 @@ def spider(url, loop, dir):
 def validate_args(args):
 	if not args.r:
 		args.l = 0
-	if not args.url.startswith('http'):
-		print("ERROR:", args.url)
+	if '.' not in args.url :
+		print("Error: not a valid URL -", args.url)
 		exit(1)
+	if not args.url.startswith('https://') and\
+		not args.url.startswith('http://'):
+		args.url = 'https://' + args.url
 	if args.url.endswith('/'):
 		args.url = args.url[:-1]
 	if not args.p.endswith('/'):
