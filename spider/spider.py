@@ -26,6 +26,7 @@ def download_images(url, directory, images):
 		if not pattern.match(img_link):
 			continue
 		img_link = form_url(img_link, url)
+		#print(url, "|", img_link, "|")
 		content = request(img_link)
 		if not content:
 			continue
@@ -40,6 +41,7 @@ def download_images(url, directory, images):
 
 def request(url):
 	try:
+		links_visited.add(url)
 		r = requests.get(url)
 	except requests.exceptions.ConnectionError:
 		print("ERROR: connection refused - ", url)
@@ -86,7 +88,6 @@ def spider(url, loop, dir, space):
 			continue
 		if href in links_visited:
 			continue
-		links_visited.add(href)
 		href = form_url(href, base)
 		spider(href, loop - 1, dir, ' ' + space)
 
@@ -102,8 +103,8 @@ def validate_args(args):
 	if not args.url.startswith('https://') and\
 		not args.url.startswith('http://'):
 		args.url = 'https://' + args.url
-	if args.url.endswith('/'):
-		args.url = args.url[:-1]
+	if not args.url.endswith('/'):
+		args.url = args.url + '/'
 
 	if not args.p.endswith('/'):
 		args.p = args.p + '/'
