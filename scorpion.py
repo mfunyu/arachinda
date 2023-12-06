@@ -4,11 +4,6 @@ from PIL import Image, ExifTags
 import os
 import time
 
-#The program correctly displays basic metadata such as the date
-# of creation and modification.
-# The program shows the EXIF data of images of these extensions:
-# jpg, png, bmp and gif.
-
 def print_exif_data(exif_data):
 	if not exif_data:
 		print(" No EXIF Data")
@@ -24,17 +19,15 @@ def print_exif_data(exif_data):
 def print_basic_metadata(img_filename, img):
 	print(" [Basic Data]")
 	try:
-		img_type = img.format
 		creation_time = os.path.getctime(img_filename)
 		modification_time = os.path.getmtime(img_filename)
 		creation_datetime = time.strftime('%Y:%m:%d %H:%M:%S', time.localtime(creation_time))
 		modification_datetime = time.strftime('%Y:%m:%d %H:%M:%S', time.localtime(modification_time))
 
-
-		print(f" - Type: {img_type}")
-		print(f" - Size: {img_type}")
-		print(f" - Width: {img_type}")
-		print(f" - Height: {img_type}")
+		print(f" - Type: {img.format}")
+		print(f" - Size: {os.path.getsize(img_filename)} bytes")
+		print(f" - Width: {img.width} pixels")
+		print(f" - Height: {img.height} pixels")
 		print(f" - Modified: {modification_datetime}")
 		print(f" - Created: {creation_datetime}")
 
